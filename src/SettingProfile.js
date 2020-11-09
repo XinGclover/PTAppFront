@@ -5,6 +5,7 @@ import withStyles from '@material-ui/styles/withStyles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import StateTemplate from './settingsModel';
 
 const styles = theme => ({
   root: {
@@ -48,6 +49,7 @@ class SettingPorfile extends Component {
       rate_R: 0,
       errormessage: '',
       exampleslist: [],
+      selectedFile: null,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -69,9 +71,50 @@ class SettingPorfile extends Component {
 
   }
 
+  onFileChange = event => {
+    this.setState({ selectedFile: event.target.files[0] });
+  }
+
+  /* onFileUpload = () => {
+    const formData = new FormData();
+    formData.append(
+      "myFile",
+      this.state.selectedFile,
+      this.state.selectedFile.name
+    );
+    console.log(this.state.selectedFile);
+    axios.post('http://localhost:8080/pytronado/settings/uploadfile', formData);
+  }
+ */
+  fileData = () => {
+    if (this.state.selectedFile) {
+      return (
+        <div>
+          <h2>File Details:</h2>
+          <p>File Name: {this.state.selectedFile.name}    </p>
+          <p>File Type: {this.state.selectedFile.type} </p>
+          <p>
+            Last Modified:{" "}
+            {this.state.selectedFile.lastModifiedDate.toDateString()}
+          </p>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <br />
+          <h4>Chooose before Pressing the Upload button</h4>
+        </div>
+      );
+    }
+  };
+
+
   handleSubmit(event) {
-    alert('A name was submitted: ' + this.state.density);
     event.preventDefault();
+    const settingsT = new StateTemplate(this.state).parseToJson();
+    axios.post('http://localhost:8080/pytronado/settings/settingsTemplate', settingsT);
+    console.log('stateTemplateHHHHHH', settingsT);
   }
 
   createProject = () => {
@@ -112,7 +155,7 @@ class SettingPorfile extends Component {
                 Settings file
        </Button>
             </Paper>
-            <Paper className={classes.paper}>
+            <Paper className={classes.paper} >
 
               {this.state.exampleslist.map(txt => <p>{txt}</p>)}
 
@@ -159,6 +202,18 @@ class SettingPorfile extends Component {
                   </Grid>
 
                   <Button variant="outlined" color="primary" type="submit" value="Submit">Submit</Button>
+
+                  <div>
+                    <h3>File Upload</h3>
+                    <div>
+                      <input type="file" onChange={this.onFileChange} />
+                      {/*  <Button variant="outlined" color="primary" onClick={this.onFileUpload}>
+                        Upload!
+                      </Button> */}
+                    </div>
+                    {this.fileData()}
+                  </div>
+
                 </form>
               </div>
             </Paper>
